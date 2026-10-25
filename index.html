@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Thực đơn gia đình</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ea; --card:#ffffff; --ink:#1f2a1f; --muted:#6b756b; --line:#e4dfd0;
+  --green:#2f6b3a; --green-soft:#e6f1e4; --orange:#c96a1b; --orange-soft:#fdeedd;
+  --blue:#2b6a9a; --blue-soft:#e3eff8; --red:#b3322a; --shadow:0 1px 3px rgba(40,40,20,.08),0 4px 14px rgba(40,40,20,.05);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+#app{min-height:100vh;padding-bottom:84px}
+main{max-width:1080px;margin:0 auto;padding:12px 14px 24px}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+.brand{font-weight:700;font-size:17px;letter-spacing:.2px}
+.top-right{display:flex;align-items:center;gap:10px}
+.saving{font-size:12px;opacity:.9}
+.top button{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:10px;width:36px;height:36px;font-size:18px}
+
+/* week bar */
+.weekbar{display:flex;align-items:center;gap:8px;margin:4px 0 12px}
+.weekbar .arrow{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:20px;line-height:1}
+.weeklabel{flex:1;text-align:center;display:flex;flex-direction:column}
+.weeklabel b{font-size:16px}
+.weeklabel small{color:var(--muted);font-size:12px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500}
+.chip.on{background:var(--green);border-color:var(--green);color:#fff}
+
+/* buttons */
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.warn{color:var(--red)}
+.btn.small{padding:6px 10px;font-size:13px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+
+/* day cards */
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px 14px;box-shadow:var(--shadow)}
+.day.today{border-color:var(--green);box-shadow:0 0 0 2px var(--green-soft),var(--shadow)}
+.day h3{margin:0 0 8px;font-size:16px;display:flex;justify-content:space-between;align-items:baseline}
+.day h3 span{color:var(--muted);font-weight:500;font-size:13px}
+.slot{display:grid;grid-template-columns:78px 1fr;gap:8px;align-items:center;padding:5px 0}
+.slot label{font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.2}
+.slot label em{display:block;font-style:normal;font-weight:400;font-size:11px}
+.slot select{width:100%;padding:8px 6px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;min-width:0}
+.slot.canh select{background:var(--green-soft)}
+.slot.man select{background:var(--orange-soft)}
+.slot.phu select{background:var(--blue-soft)}
+.tip{grid-column:2;font-size:12px;color:var(--orange);margin:-2px 0 2px}
+.sep{height:1px;background:var(--line);margin:4px 0}
+
+/* shopping */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.stepper{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.stepper .ctr{display:flex;align-items:center;gap:12px}
+.stepper button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:18px}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--green);transition:width .25s}
+.group h4{margin:14px 2px 6px;font-size:15px}
+.item{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.item input{width:20px;height:20px;accent-color:var(--green)}
+.iname{font-weight:600}
+.iname small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.iqty{font-weight:600;color:var(--green);white-space:nowrap}
+.item.done{opacity:.5}
+.item.done .iname{text-decoration:line-through}
+.empty{text-align:center;color:var(--muted);padding:36px 12px}
+
+/* dishes */
+.toolbar{display:flex;gap:8px;margin-bottom:10px}
+.toolbar input[type=search]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}
+.chips .chip{white-space:nowrap}
+.dishlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.dish{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.dname{font-weight:600;margin-bottom:4px}
+.dmeta{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:99px;background:#efede3;color:#4a4f43}
+.tag.t-man{background:var(--orange-soft);color:#8a4710}
+.tag.t-canh{background:var(--green-soft);color:#1f5028}
+.tag.t-phu{background:var(--blue-soft);color:#1f4d73}
+.tag.off{background:#f3e3e0;color:#8a2c25}
+.ding{font-size:12.5px;color:var(--muted)}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.nav button{flex:1;background:none;border:0;border-radius:12px;padding:6px 4px;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button span{font-size:20px;line-height:1}
+.nav button.on{color:var(--green);background:var(--green-soft)}
+
+/* modal */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,25,15,.45);display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.overlay{align-items:center}.modal{border-radius:20px}}
+.modal h2{margin:0 0 12px;font-size:18px}
+.field{margin-bottom:10px}
+.field>label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:3px}
+.field input[type=text],.field input[type=number],.field select,.field textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ing-row{display:grid;grid-template-columns:1fr 62px 54px 78px 30px;gap:5px;margin-bottom:5px}
+.ing-row input,.ing-row select{padding:7px 6px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0;width:100%}
+.ing-row button{border:0;background:none;color:var(--red);font-size:18px}
+.months{display:flex;flex-wrap:wrap;gap:6px}
+.months label{display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px}
+.modal-actions{display:flex;gap:8px;justify-content:space-between;margin-top:14px}
+.modal-actions .r{display:flex;gap:8px}
+
+/* misc */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));background:#25301f;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:60;max-width:90vw;box-shadow:var(--shadow)}
+.toast.err{background:var(--red)}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 24px;max-width:340px;width:100%;text-align:center;box-shadow:var(--shadow)}
+.login-card .logo{font-size:44px}
+.login-card h1{margin:6px 0 4px;font-size:21px}
+.login-card p{margin:0 0 16px;color:var(--muted)}
+.login-card input{width:100%;padding:12px;text-align:center;font-size:20px;letter-spacing:6px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.login-card .btn{width:100%;padding:12px}
+.err{color:var(--red);font-size:13px;min-height:18px;margin-top:8px}
+.setup{max-width:560px;margin:40px auto;padding:0 18px}
+.setup code{background:#efede3;padding:1px 6px;border-radius:6px}
+.hint{font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript>Cần bật JavaScript để dùng ứng dụng.</noscript>
+
+<script>
+(() => {
+'use strict';
+
+/* ================================================================
+   CẤU HÌNH — dán URL "Ứng dụng web" (kết thúc bằng /exec) của Apps Script vào đây
+   ================================================================ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxlqrHLzae_XuLdB7PVp5IKbW7VL3DVGu77RI53rdD8yQIgPbrTBZTDGcPzj0Nee6Q/exec';
+
+/* ================================================================
+   LOGIC THUẦN (không đụng DOM) — dễ kiểm thử
+   ================================================================ */
+const SLOTS = [
+  { id: 'canhTrua', label: 'Canh trưa', type: 'Canh chính', cls: 'canh' },
+  { id: 'canhToi',  label: 'Canh tối',  type: 'Canh chính', cls: 'canh' },
+  { id: 'man',      label: 'Mặn chính', sub: 'nấu trưa, dùng cả tối', type: 'Mặn chính', cls: 'man' },
+  { id: 'phuTrua',  label: 'Phụ trưa',  type: 'Món phụ', cls: 'phu' },
+  { id: 'phuToi',   label: 'Phụ tối',   type: 'Món phụ', cls: 'phu' },
+];
+const TYPES = ['Mặn chính', 'Canh chính', 'Món phụ'];
+const WEEKDAYS = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+const SHOP_GROUPS = [
+  { id: 'v', title: '🥬 Rau củ, quả', match: ['v'] },
+  { id: 'p', title: '🥩 Thịt – cá – hải sản', match: ['p'] },
+  { id: 'k', title: '🧂 Đồ khô – gia vị', match: ['o', 'a'] },
+];
+const GRP_OPTIONS = [['p', 'Đạm'], ['v', 'Rau củ'], ['a', 'Gia vị'], ['o', 'Khác']];
+const BASE_SERVINGS = 4; // định lượng trong sheet "Món ăn" là cho 4 người
+
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+const mondayOf = s => { const d = parseYmd(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return ymd(d); };
+const fmtDM = s => { const d = parseYmd(s); return `${d.getDate()}/${d.getMonth() + 1}`; };
+const weekDates = ws => Array.from({ length: 7 }, (_, i) => addDays(ws, i));
+
+const normName = s => String(s || '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim();
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+function parseIngredients(str) {
+  return String(str || '').split(';').map(s => s.trim()).filter(Boolean).map(s => {
+    const p = s.split('|').map(x => x.trim());
+    const q = parseFloat(String(p[1] || '').replace(',', '.'));
+    return { name: p[0] || '', qty: isNaN(q) ? 0 : q, unit: p[2] || '', grp: (p[3] || 'o').toLowerCase() };
+  }).filter(i => i.name);
+}
+const serializeIngredients = list => list.map(i => [i.name, i.qty, i.unit, i.grp].join('|')).join('; ');
+
+function monthsOf(dish) {
+  return String(dish.months || '').split(/[\s,;]+/).map(Number).filter(n => n >= 1 && n <= 12);
+}
+function inSeason(dish, month) {
+  const m = monthsOf(dish);
+  return m.length === 0 || m.indexOf(month) >= 0;
+}
+
+const fmtNum = n => String(Math.round(n * 10) / 10).replace('.', ',');
+function fmtQty(q, unit) {
+  if (!q) return unit || '';
+  if (unit === 'g') {
+    if (q >= 1000) return `${fmtNum(Math.ceil(q / 100) / 10)} kg`;
+    return `${q >= 100 ? Math.ceil(q / 10) * 10 : Math.ceil(q / 5) * 5} g`;
+  }
+  if (unit === 'ml') {
+    if (q >= 1000) return `${fmtNum(Math.ceil(q / 100) / 10)} lít`;
+    return `${Math.ceil(q / 10) * 10} ml`;
+  }
+  return `${Math.ceil(q - 1e-9)} ${unit}`.trim();
+}
+
+/** Gộp nguyên liệu của cả tuần. Mặn chính tính 1 lần/ngày, canh nấu riêng từng bữa, phụ riêng từng bữa. */
+function buildShopping(dates, menu, dishByName, servings) {
+  const factor = (servings || BASE_SERVINGS) / BASE_SERVINGS;
+  const map = new Map();
+  const add = dish => {
+    parseIngredients(dish.ingredients).forEach(ing => {
+      const key = normName(ing.name) + '|' + ing.unit;
+      let e = map.get(key);
+      if (!e) { e = { key, name: cap(ing.name), unit: ing.unit, grp: ing.grp, qty: 0, from: new Set() }; map.set(key, e); }
+      e.qty += ing.qty * factor;
+      e.from.add(dish.name);
+    });
+  };
+  dates.forEach(date => {
+    const row = menu[date];
+    if (!row) return;
+    SLOTS.forEach(s => { const d = dishByName[row[s.id]]; if (d) add(d); });
+  });
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+}
+
+/** Số lần mỗi món đã dùng trong `days` ngày trước ngày `before`. */
+function usageBefore(menu, before, days) {
+  const from = addDays(before, -days);
+  const use = {};
+  Object.keys(menu).forEach(date => {
+    if (date < from || date >= before) return;
+    const r = menu[date];
+    SLOTS.forEach(s => { if (r[s.id]) use[r[s.id]] = (use[r[s.id]] || 0) + 1; });
+  });
+  return use;
+}
+
+/** Gợi ý thực đơn cả tuần: hợp mùa, tránh lặp (cả tuần và 28 ngày trước), đổi nhóm đạm, tận dụng nguyên liệu chung. */
+function suggestWeek(dates, dishes, usage, rng) {
+  rng = rng || Math.random;
+  const byType = t => dishes.filter(d => d.type === t);
+  const ingNames = d => parseIngredients(d.ingredients).map(i => normName(i.name));
+  const used = {}, manProt = {}, ingSet = new Set();
+  const overlap = d => Math.min(ingNames(d).filter(i => ingSet.has(i)).length, 3) * 3;
+  const pick = (cands, score) => {
+    let best = null, bs = -1e9;
+    cands.forEach(c => { const s = score(c) + rng() * 8; if (s > bs) { bs = s; best = c; } });
+    return best;
+  };
+  const take = d => {
+    if (!d) return '';
+    used[d.name] = (used[d.name] || 0) + 1;
+    ingNames(d).forEach(i => ingSet.add(i));
+    return d.name;
+  };
+  const rows = [];
+  let prevProt = null;
+  dates.forEach(date => {
+    const month = parseYmd(date).getMonth() + 1;
+    const base = d => (inSeason(d, month) ? 0 : -60) - (usage[d.name] || 0) * 12 - (used[d.name] || 0) * 80;
+
+    const man = pick(byType('Mặn chính'), d =>
+      base(d) + (d.keep >= 3 ? 5 : 0) - (d.protein === prevProt ? 35 : 0) - (manProt[d.protein] || 0) * 10 + overlap(d));
+    if (man) { take(man); manProt[man.protein] = (manProt[man.protein] || 0) + 1; prevProt = man.protein; }
+
+    const canhs = byType('Canh chính');
+    const c1 = pick(canhs, d => base(d) - (man && d.protein === man.protein ? 25 : 0) + overlap(d));
+    take(c1);
+    const c2 = pick(canhs.filter(d => d !== c1), d =>
+      base(d) - (man && d.protein === man.protein ? 25 : 0) - (c1 && d.protein === c1.protein ? 20 : 0) + overlap(d));
+    take(c2);
+
+    // Mỗi ngày cần ít nhất 1 món rau lá xanh (canh hoặc phụ); không "phí" món rau lá vào ngày đã đủ.
+    const needLeaf = !((c1 && c1.leaf) || (c2 && c2.leaf));
+    const phus = byType('Món phụ');
+    const p1 = pick(phus, d => base(d) + (d.leaf ? (needLeaf ? 20 : 3) : 0) + overlap(d) * 0.5);
+    take(p1);
+    const needLeaf2 = needLeaf && !(p1 && p1.leaf);
+    const p2 = pick(phus.filter(d => d !== p1), d =>
+      base(d) + (d.leaf ? (needLeaf2 ? 20 : 3) : 0) + (p1 && d.method !== p1.method ? 10 : 0) + overlap(d) * 0.5);
+    take(p2);
+
+    rows.push({
+      date, week: mondayOf(date),
+      canhTrua: c1 ? c1.name : '', canhToi: c2 ? c2.name : '', man: man ? man.name : '',
+      phuTrua: p1 ? p1.name : '', phuToi: p2 ? p2.name : '',
+    });
+  });
+  return rows;
+}
+
+window.__core = { parseIngredients, serializeIngredients, buildShopping, suggestWeek, usageBefore,
+  inSeason, fmtQty, mondayOf, addDays, weekDates, normName, SLOTS };
+
+/* ================================================================
+   TRẠNG THÁI & API
+   ================================================================ */
+const state = {
+  pin: '', ready: false, loginError: '', dishes: [], dishByName: {}, menu: {}, bought: new Set(),
+  config: { so_nguoi: BASE_SERVINGS }, weekStart: mondayOf(ymd(new Date())), tab: 'menu',
+  dishFilter: 'all', search: '', edit: null, toast: null, pending: 0, snapshot: '',
+};
+window.__app = { state };
+
+const $ = sel => document.querySelector(sel);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const configured = () => API_URL && API_URL.indexOf('PASTE_') < 0;
+
+async function api(action, payload) {
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ pin: state.pin, action }, payload || {})) });
+  const j = await res.json();
+  if (!j.ok) { const e = new Error(j.error || 'Lỗi không rõ'); e.code = j.code; throw e; }
+  return j;
+}
+
+function applyData(res) {
+  state.dishes = res.dishes || [];
+  state.dishByName = {};
+  state.dishes.forEach(d => { state.dishByName[d.name] = d; });
+  state.menu = {};
+  (res.menu || []).forEach(r => { state.menu[r.date] = r; });
+  state.bought = new Set((res.bought || []).map(b => b.week + '|' + b.key));
+  state.config = res.config || { so_nguoi: BASE_SERVINGS };
+}
+
+async function loadAll(silent) {
+  const res = await api('loadAll');
+  const snap = JSON.stringify([res.dishes, res.menu, res.bought, res.config]);
+  if (silent && snap === state.snapshot) return false;
+  state.snapshot = snap;
+  applyData(res);
+  return true;
+}
+
+function toast(msg, isErr) {
+  state.toast = { msg, isErr: !!isErr };
+  const el = $('.toast');
+  if (el) el.remove();
+  document.body.insertAdjacentHTML('beforeend', `<div class="toast ${isErr ? 'err' : ''}">${esc(msg)}</div>`);
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => { const e = $('.toast'); if (e) e.remove(); state.toast = null; }, 2600);
+}
+
+async function bg(action, payload, failMsg) {
+  state.pending++; renderSaving();
+  try { return await api(action, payload); }
+  catch (e) { toast((failMsg || 'Lưu lỗi') + ': ' + e.message, true); try { await loadAll(false); render(); } catch (_) {} }
+  finally { state.pending--; renderSaving(); }
+}
+function renderSaving() {
+  const el = $('.saving');
+  if (el) el.textContent = state.pending > 0 ? 'Đang lưu…' : '';
+}
+
+/* ================================================================
+   GIAO DIỆN
+   ================================================================ */
+function render() {
+  const app = $('#app');
+  const y = window.scrollY;
+  if (!configured()) { app.innerHTML = setupView(); return; }
+  if (!state.ready) { app.innerHTML = loginView(); return; }
+  app.innerHTML = headerView() + '<main>' +
+    (state.tab === 'menu' ? menuView() : state.tab === 'shop' ? shopView() : dishesView()) +
+    '</main>' + navView() + (state.edit ? editView() : '');
+  window.scrollTo(0, y);
+}
+
+function setupView() {
+  return `<div class="setup"><h1>🍲 Thực đơn gia đình</h1>
+  <p>Trang chưa được nối với Google Sheet. Mở file <code>index.html</code>, tìm dòng <code>const API_URL = '...'</code> và dán URL ứng dụng web (kết thúc bằng <code>/exec</code>) lấy từ Apps Script.</p></div>`;
+}
+
+function loginView() {
+  return `<div class="login"><div class="login-card"><div class="logo">🍲</div><h1>Thực đơn gia đình</h1>
+  <p>Nhập mã PIN của gia đình</p>
+  <form id="loginForm"><input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" autofocus>
+  <button class="btn primary" type="submit">Vào</button></form><div class="err">${esc(state.loginError)}</div></div></div>`;
+}
+
+function headerView() {
+  return `<header class="top"><div class="brand">🍲 Thực đơn gia đình</div>
+  <div class="top-right"><span class="saving">${state.pending > 0 ? 'Đang lưu…' : ''}</span>
+  <button data-act="refresh" title="Tải lại dữ liệu">↻</button></div></header>`;
+}
+
+function navView() {
+  const b = (id, ico, label) => `<button data-tab="${id}" class="${state.tab === id ? 'on' : ''}"><span>${ico}</span>${label}</button>`;
+  return `<nav class="nav">${b('menu', '🍽️', 'Thực đơn')}${b('shop', '🛒', 'Đi chợ')}${b('dishes', '📖', 'Kho món')}</nav>`;
+}
+
+function weekBar() {
+  const end = addDays(state.weekStart, 6);
+  return `<div class="weekbar"><button class="arrow" data-act="prevWeek" aria-label="Tuần trước">‹</button>
+  <div class="weeklabel"><b>Tuần ${fmtDM(state.weekStart)} – ${fmtDM(end)}</b><small>${parseYmd(end).getFullYear()}</small></div>
+  <button class="arrow" data-act="nextWeek" aria-label="Tuần sau">›</button>
+  <button class="chip" data-act="thisWeek">Hôm nay</button></div>`;
+}
+
+function optionsFor(slot, current, usage, month) {
+  const list = state.dishes.filter(d => d.type === slot.type)
+    .sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+  let html = `<option value="">— chọn món —</option>`;
+  let found = !current;
+  list.forEach(d => {
+    const n = usage[d.name] || 0;
+    const label = d.name + (inSeason(d, month) ? '' : ' 🍂') + (n ? ` · ${n} lần gần đây` : '');
+    if (d.name === current) found = true;
+    html += `<option value="${esc(d.name)}"${d.name === current ? ' selected' : ''}>${esc(label)}</option>`;
+  });
+  if (!found) html += `<option value="${esc(current)}" selected>${esc(current)} (không còn trong kho)</option>`;
+  return html;
+}
+
+function menuView() {
+  const dates = weekDates(state.weekStart);
+  const usage = usageBefore(state.menu, state.weekStart, 28);
+  const today = ymd(new Date());
+  const days = dates.map((date, i) => {
+    const row = state.menu[date] || {};
+    const month = parseYmd(date).getMonth() + 1;
+    const slotHtml = SLOTS.map((s, idx) => {
+      const sep = idx === 2 || idx === 3 ? '<div class="sep"></div>' : '';
+      const dish = state.dishByName[row[s.id]];
+      const tip = s.id === 'man' && dish && dish.tip ? `<div class="tip">💡 ${esc(dish.tip)}</div>` : '';
+      return `${sep}<div class="slot ${s.cls}"><label>${s.label}${s.sub ? `<em>${s.sub}</em>` : ''}</label>
+        <select data-date="${date}" data-slot="${s.id}">${optionsFor(s, row[s.id], usage, month)}</select>${tip}</div>`;
+    }).join('');
+    return `<section class="day ${date === today ? 'today' : ''}"><h3>${WEEKDAYS[i]} <span>${fmtDM(date)}</span></h3>${slotHtml}</section>`;
+  }).join('');
+  return `${weekBar()}<div class="actions">
+    <button class="btn primary" data-act="suggest">✨ Gợi ý cả tuần</button>
+    <button class="btn warn" data-act="clearWeek">🧹 Xoá tuần này</button></div>
+    <div class="days">${days}</div>
+    <p class="hint">🍂 = trái mùa tháng này · “n lần gần đây” = số lần đã dùng trong 28 ngày trước tuần này. Canh nấu riêng trưa/tối; mặn chính nấu 1 lần trưa, hâm lại tối.</p>`;
+}
+
+function shopView() {
+  const dates = weekDates(state.weekStart);
+  const items = buildShopping(dates, state.menu, state.dishByName, state.config.so_nguoi);
+  const doneCount = items.filter(i => state.bought.has(state.weekStart + '|' + i.key)).length;
+  const pct = items.length ? Math.round(doneCount * 100 / items.length) : 0;
+  let body;
+  if (!items.length) {
+    body = `<div class="empty">Tuần này chưa có món nào.<br>Vào tab <b>Thực đơn</b> để chọn món hoặc bấm <b>✨ Gợi ý cả tuần</b>.</div>`;
+  } else {
+    body = SHOP_GROUPS.map(g => {
+      const list = items.filter(i => g.match.indexOf(i.grp) >= 0 || (g.id === 'k' && 'pvoa'.indexOf(i.grp) < 0));
+      if (!list.length) return '';
+      return `<div class="group"><h4>${g.title} (${list.length})</h4>` + list.map(i => {
+        const done = state.bought.has(state.weekStart + '|' + i.key);
+        return `<label class="item ${done ? 'done' : ''}"><input type="checkbox" data-key="${esc(i.key)}" ${done ? 'checked' : ''}>
+          <span class="iname">${esc(i.name)}<small>${esc(Array.from(i.from).join(', '))}</small></span>
+          <span class="iqty">${esc(fmtQty(i.qty, i.unit))}</span></label>`;
+      }).join('') + '</div>';
+    }).join('');
+  }
+  return `${weekBar()}
+  <div class="panel"><div class="stepper"><div><b>Số người ăn</b><div class="hint">Định lượng tự nhân theo số người (món trong kho tính cho ${BASE_SERVINGS} người)</div></div>
+    <div class="ctr"><button data-act="servDown">−</button><b>${state.config.so_nguoi}</b><button data-act="servUp">+</button></div></div></div>
+  <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <b>Đã mua ${doneCount}/${items.length}</b>
+    <span><button class="btn small" data-act="copyList">📋 Sao chép</button> <button class="btn small" data-act="resetBought">Bỏ tick hết</button></span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div></div>
+  ${body}`;
+}
+
+function dishesView() {
+  const chips = [['all', 'Tất cả']].concat(TYPES.map(t => [t, t]))
+    .map(([id, label]) => `<button class="chip ${state.dishFilter === id ? 'on' : ''}" data-filter="${id}">${label}</button>`).join('');
+  return `<div class="toolbar"><input id="search" type="search" placeholder="Tìm món hoặc nguyên liệu…" value="${esc(state.search)}">
+    <button class="btn primary" data-act="addDish">＋ Thêm món</button></div>
+    <div class="chips">${chips}</div><div class="dishlist" id="dishList">${dishListHtml()}</div>`;
+}
+
+function dishListHtml() {
+  const q = normName(state.search);
+  const month = new Date().getMonth() + 1;
+  const list = state.dishes.filter(d => (state.dishFilter === 'all' || d.type === state.dishFilter) &&
+    (!q || normName(d.name + ' ' + d.ingredients + ' ' + d.protein).indexOf(q) >= 0))
+    .sort((a, b) => TYPES.indexOf(a.type) - TYPES.indexOf(b.type) || a.name.localeCompare(b.name, 'vi'));
+  if (!list.length) return `<div class="empty" style="grid-column:1/-1">Không có món phù hợp.</div>`;
+  const cls = { 'Mặn chính': 't-man', 'Canh chính': 't-canh', 'Món phụ': 't-phu' };
+  return list.map(d => {
+    const m = monthsOf(d);
+    const season = m.length ? `<span class="tag">Tháng ${m.join(', ')}</span>` : '';
+    const off = inSeason(d, month) ? '' : '<span class="tag off">🍂 trái mùa</span>';
+    const ings = parseIngredients(d.ingredients).map(i => i.name).join(', ');
+    return `<button class="dish" data-act="editDish" data-code="${esc(d.code)}"><div class="dname">${esc(d.name)}</div>
+      <div class="dmeta"><span class="tag ${cls[d.type] || ''}">${esc(d.type)}</span>${d.protein ? `<span class="tag">${esc(d.protein)}</span>` : ''}
+      ${d.method ? `<span class="tag">${esc(d.method)}</span>` : ''}${season}${off}</div><div class="ding">${esc(ings)}</div></button>`;
+  }).join('');
+}
+
+/* ---------- Form thêm/sửa món ---------- */
+function ingRowHtml(i) {
+  i = i || { name: '', qty: '', unit: 'g', grp: 'v' };
+  const opts = GRP_OPTIONS.map(([v, l]) => `<option value="${v}"${i.grp === v ? ' selected' : ''}>${l}</option>`).join('');
+  return `<div class="ing-row"><input class="i-name" type="text" placeholder="Nguyên liệu" value="${esc(i.name)}">
+    <input class="i-qty" type="text" inputmode="decimal" placeholder="SL" value="${esc(i.qty)}">
+    <input class="i-unit" type="text" placeholder="đơn vị" value="${esc(i.unit)}"><select class="i-grp">${opts}</select>
+    <button type="button" data-act="delIng" aria-label="Xoá">✕</button></div>`;
+}
+
+function editView() {
+  const d = state.edit.dish;
+  const months = monthsOf(d);
+  const all = months.length === 0;
+  const monthChips = Array.from({ length: 12 }, (_, i) => i + 1).map(m =>
+    `<label><input type="checkbox" value="${m}" ${all || months.indexOf(m) >= 0 ? 'checked' : ''}>T${m}</label>`).join('');
+  const ings = parseIngredients(d.ingredients);
+  const rows = (ings.length ? ings : [null]).map(ingRowHtml).join('');
+  const typeOpts = TYPES.map(t => `<option${d.type === t ? ' selected' : ''}>${t}</option>`).join('');
+  const dl = (id, arr) => `<datalist id="${id}">${arr.map(x => `<option value="${x}">`).join('')}</datalist>`;
+  return `<div class="overlay" data-act="overlay"><div class="modal" role="dialog" aria-modal="true">
+    <h2>${state.edit.isNew ? 'Thêm món mới' : 'Sửa món'}</h2>
+    <div class="field"><label>Tên món</label><input id="f-name" type="text" value="${esc(d.name)}"></div>
+    <div class="row2"><div class="field"><label>Loại</label><select id="f-type">${typeOpts}</select></div>
+      <div class="field"><label>Nhóm đạm</label><input id="f-protein" type="text" list="dl-protein" value="${esc(d.protein)}"></div></div>
+    <div class="row2"><div class="field"><label>Cách nấu</label><input id="f-method" type="text" list="dl-method" value="${esc(d.method)}"></div>
+      <div class="field"><label>Giữ vị đến tối</label><select id="f-keep"><option value="3"${d.keep === 3 ? ' selected' : ''}>3 – tốt</option><option value="2"${d.keep === 2 ? ' selected' : ''}>2 – cần mẹo hâm</option></select></div></div>
+    <div class="field"><label>Nguyên liệu (cho ${BASE_SERVINGS} người)</label><div id="ingRows">${rows}</div>
+      <button type="button" class="btn small" data-act="addIng">＋ Thêm nguyên liệu</button></div>
+    <div class="field"><label>Tháng hợp mùa (chọn đủ 12 tháng = quanh năm)</label><div class="months" id="monthChips">${monthChips}</div></div>
+    <div class="field"><label><input id="f-leaf" type="checkbox" ${d.leaf ? 'checked' : ''}> Có rau lá xanh</label></div>
+    <div class="field"><label>Mẹo hâm lại buổi tối (nếu có)</label><textarea id="f-tip" rows="2">${esc(d.tip)}</textarea></div>
+    ${dl('dl-protein', ['Heo', 'Bò', 'Gà', 'Cá', 'Tôm tép', 'Mực', 'Ngao ốc', 'Ếch', 'Cua', 'Trứng', 'Đạm thực vật', 'Rau'])}
+    ${dl('dl-method', ['Kho', 'Rim', 'Luộc', 'Hấp', 'Nướng', 'Hầm', 'Nấu', 'Sốt', 'Xào'])}
+    <div class="modal-actions"><div>${state.edit.isNew ? '' : '<button class="btn warn" data-act="delDish">Xoá món</button>'}</div>
+      <div class="r"><button class="btn" data-act="closeEdit">Huỷ</button><button class="btn primary" data-act="saveDish">Lưu</button></div></div>
+  </div></div>`;
+}
+
+function collectEdit() {
+  const g = id => document.getElementById(id);
+  const ings = Array.from(document.querySelectorAll('#ingRows .ing-row')).map(r => ({
+    name: r.querySelector('.i-name').value.trim(),
+    qty: parseFloat(r.querySelector('.i-qty').value.replace(',', '.')) || 0,
+    unit: r.querySelector('.i-unit').value.trim(),
+    grp: r.querySelector('.i-grp').value,
+  })).filter(i => i.name);
+  const months = Array.from(document.querySelectorAll('#monthChips input:checked')).map(c => c.value);
+  return {
+    code: state.edit.dish.code || '', name: g('f-name').value.trim(), type: g('f-type').value,
+    protein: g('f-protein').value.trim(), method: g('f-method').value.trim(),
+    ingredients: serializeIngredients(ings), keep: Number(g('f-keep').value) || 3,
+    leaf: g('f-leaf').checked, months: months.length === 12 || months.length === 0 ? '' : months.join(' '),
+    tip: g('f-tip').value.trim(),
+  };
+}
+
+/* ================================================================
+   HÀNH ĐỘNG
+   ================================================================ */
+function rowFor(date) {
+  const r = state.menu[date] || { date, week: mondayOf(date), canhTrua: '', canhToi: '', man: '', phuTrua: '', phuToi: '' };
+  r.date = date; r.week = mondayOf(date);
+  state.menu[date] = r;
+  return r;
+}
+
+function onSlotChange(sel) {
+  const row = rowFor(sel.dataset.date);
+  row[sel.dataset.slot] = sel.value;
+  render();
+  bg('saveMenuRows', { rows: [row] });
+}
+
+function onToggleBought(cb) {
+  const k = state.weekStart + '|' + cb.dataset.key;
+  if (cb.checked) state.bought.add(k); else state.bought.delete(k);
+  render();
+  bg('setBought', { week: state.weekStart, key: cb.dataset.key, on: cb.checked });
+}
+
+function suggestAll() {
+  const dates = weekDates(state.weekStart);
+  const hasAny = dates.some(d => state.menu[d] && SLOTS.some(s => state.menu[d][s.id]));
+  if (hasAny && !confirm('Tuần này đã có món. Gợi ý lại sẽ thay thế toàn bộ. Tiếp tục?')) return;
+  if (!state.dishes.length) { toast('Kho món đang trống', true); return; }
+  const usage = usageBefore(state.menu, state.weekStart, 28);
+  const rows = suggestWeek(dates, state.dishes, usage);
+  rows.forEach(r => { state.menu[r.date] = r; });
+  render();
+  bg('saveMenuRows', { rows });
+  toast('Đã gợi ý thực đơn cả tuần');
+}
+
+function clearWeek() {
+  if (!confirm('Xoá toàn bộ món của tuần này?')) return;
+  const rows = weekDates(state.weekStart).map(date => ({ date, week: state.weekStart, canhTrua: '', canhToi: '', man: '', phuTrua: '', phuToi: '' }));
+  rows.forEach(r => { state.menu[r.date] = r; });
+  render();
+  bg('saveMenuRows', { rows });
+}
+
+function shoppingText() {
+  const items = buildShopping(weekDates(state.weekStart), state.menu, state.dishByName, state.config.so_nguoi)
+    .filter(i => !state.bought.has(state.weekStart + '|' + i.key));
+  let out = `Đi chợ tuần ${fmtDM(state.weekStart)} – ${fmtDM(addDays(state.weekStart, 6))}\n`;
+  SHOP_GROUPS.forEach(g => {
+    const list = items.filter(i => g.match.indexOf(i.grp) >= 0 || (g.id === 'k' && 'pvoa'.indexOf(i.grp) < 0));
+    if (!list.length) return;
+    out += `\n${g.title}\n` + list.map(i => `- ${i.name}: ${fmtQty(i.qty, i.unit)}`).join('\n') + '\n';
+  });
+  return out;
+}
+
+async function copyList() {
+  const text = shoppingText();
+  try { await navigator.clipboard.writeText(text); toast('Đã sao chép danh sách chưa mua'); }
+  catch (_) {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Đã sao chép danh sách chưa mua'); } catch (e) { toast('Không sao chép được', true); }
+    ta.remove();
+  }
+}
+
+function resetBought() {
+  const prefix = state.weekStart + '|';
+  const keys = Array.from(state.bought).filter(k => k.indexOf(prefix) === 0);
+  if (!keys.length) return;
+  if (!confirm('Bỏ tick toàn bộ danh sách của tuần này?')) return;
+  keys.forEach(k => { state.bought.delete(k); bg('setBought', { week: state.weekStart, key: k.slice(prefix.length), on: false }); });
+  render();
+}
+
+function changeServings(delta) {
+  const n = Math.max(1, Math.min(20, (state.config.so_nguoi || BASE_SERVINGS) + delta));
+  state.config.so_nguoi = n;
+  render();
+  bg('saveConfig', { config: { so_nguoi: n } });
+}
+
+function openEdit(code) {
+  const found = state.dishes.find(d => d.code === code);
+  const dish = found ? Object.assign({}, found) :
+    { code: '', name: '', type: state.dishFilter !== 'all' ? state.dishFilter : 'Mặn chính', protein: '', method: '', ingredients: '', keep: 3, leaf: false, months: '', tip: '' };
+  state.edit = { isNew: !found, dish, oldName: found ? found.name : '' };
+  render();
+}
+function closeEdit() { state.edit = null; render(); }
+
+async function saveDish() {
+  const d = collectEdit();
+  if (!d.name) { toast('Nhập tên món', true); return; }
+  if (!parseIngredients(d.ingredients).length) { toast('Thêm ít nhất 1 nguyên liệu để tính danh sách đi chợ', true); return; }
+  const dup = state.dishes.find(x => normName(x.name) === normName(d.name) && x.code !== d.code);
+  if (dup) { toast('Đã có món trùng tên: ' + dup.name, true); return; }
+  const oldName = state.edit.oldName;
+  state.pending++; renderSaving();
+  try {
+    const res = await api('saveDish', { dish: d });
+    const saved = res.dish;
+    const i = state.dishes.findIndex(x => x.code === saved.code);
+    if (i >= 0) state.dishes[i] = saved; else state.dishes.push(saved);
+    state.dishByName = {}; state.dishes.forEach(x => { state.dishByName[x.name] = x; });
+    if (oldName && oldName !== saved.name) { // đổi tên → cập nhật các tuần đã xếp món này
+      const changed = [];
+      Object.keys(state.menu).forEach(date => {
+        const r = state.menu[date]; let hit = false;
+        SLOTS.forEach(s => { if (r[s.id] === oldName) { r[s.id] = saved.name; hit = true; } });
+        if (hit) changed.push(r);
+      });
+      if (changed.length) await api('saveMenuRows', { rows: changed });
+    }
+    state.edit = null; render(); toast('Đã lưu món');
+  } catch (e) { toast('Lưu lỗi: ' + e.message, true); }
+  finally { state.pending--; renderSaving(); }
+}
+
+async function deleteDish() {
+  const d = state.edit.dish;
+  const inUse = Object.keys(state.menu).some(date => SLOTS.some(s => state.menu[date][s.id] === d.name));
+  if (!confirm(`Xoá món "${d.name}"?` + (inUse ? '\nMón này đang có trong thực đơn các tuần — tên món vẫn hiện nhưng không tính nguyên liệu.' : ''))) return;
+  state.pending++; renderSaving();
+  try {
+    await api('deleteDish', { code: d.code });
+    state.dishes = state.dishes.filter(x => x.code !== d.code);
+    delete state.dishByName[d.name];
+    state.edit = null; render(); toast('Đã xoá món');
+  } catch (e) { toast('Xoá lỗi: ' + e.message, true); }
+  finally { state.pending--; renderSaving(); }
+}
+
+async function login(pin) {
+  state.pin = pin; state.loginError = '';
+  try {
+    await loadAll(false);
+    state.ready = true;
+    try { localStorage.setItem('tdgd_pin', pin); } catch (_) {}
+  } catch (e) {
+    state.ready = false;
+    state.loginError = e.code === 'BAD_PIN' ? 'Sai mã PIN' : 'Không kết nối được: ' + e.message;
+    try { localStorage.removeItem('tdgd_pin'); } catch (_) {}
+  }
+  render();
+}
+
+/* ================================================================
+   SỰ KIỆN
+   ================================================================ */
+document.addEventListener('submit', e => {
+  if (e.target.id === 'loginForm') {
+    e.preventDefault();
+    const pin = $('#pinInput').value.trim();
+    if (pin) login(pin);
+  }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('select[data-slot]')) onSlotChange(t);
+  else if (t.matches('input[type=checkbox][data-key]')) onToggleBought(t);
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'search') {
+    state.search = e.target.value;
+    const list = $('#dishList');
+    if (list) list.innerHTML = dishListHtml();
+  }
+});
+
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { state.tab = tab.dataset.tab; render(); window.scrollTo(0, 0); return; }
+  const filt = e.target.closest('[data-filter]');
+  if (filt) { state.dishFilter = filt.dataset.filter; render(); return; }
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const act = el.dataset.act;
+  if (act === 'overlay') { if (e.target === el) closeEdit(); return; }
+  switch (act) {
+    case 'refresh': loadAll(false).then(() => { render(); toast('Đã tải lại'); }).catch(err => toast('Lỗi: ' + err.message, true)); break;
+    case 'prevWeek': state.weekStart = addDays(state.weekStart, -7); render(); break;
+    case 'nextWeek': state.weekStart = addDays(state.weekStart, 7); render(); break;
+    case 'thisWeek': state.weekStart = mondayOf(ymd(new Date())); render(); break;
+    case 'suggest': suggestAll(); break;
+    case 'clearWeek': clearWeek(); break;
+    case 'copyList': copyList(); break;
+    case 'resetBought': resetBought(); break;
+    case 'servUp': changeServings(1); break;
+    case 'servDown': changeServings(-1); break;
+    case 'addDish': openEdit(null); break;
+    case 'editDish': openEdit(el.dataset.code); break;
+    case 'closeEdit': closeEdit(); break;
+    case 'saveDish': saveDish(); break;
+    case 'delDish': deleteDish(); break;
+    case 'addIng': $('#ingRows').insertAdjacentHTML('beforeend', ingRowHtml()); break;
+    case 'delIng': { const row = el.closest('.ing-row'); if (document.querySelectorAll('#ingRows .ing-row').length > 1) row.remove(); else row.querySelectorAll('input').forEach(i => { i.value = ''; }); break; }
+  }
+});
+
+// Tự đồng bộ khi nhiều người cùng dùng
+setInterval(async () => {
+  if (!state.ready || document.hidden || state.edit || state.pending > 0) return;
+  try { if (await loadAll(true)) render(); } catch (_) {}
+}, 45000);
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden || !state.ready || state.edit || state.pending > 0) return;
+  try { if (await loadAll(true)) render(); } catch (_) {}
+});
+
+/* ================================================================
+   KHỞI ĐỘNG
+   ================================================================ */
+(async function boot() {
+  render();
+  if (!configured()) return;
+  let saved = '';
+  try { saved = localStorage.getItem('tdgd_pin') || ''; } catch (_) {}
+  if (saved) await login(saved);
+})();
+})();
+</script>
+</body>
+</html>
